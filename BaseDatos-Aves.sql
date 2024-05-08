@@ -103,7 +103,7 @@ INSERT INTO reproduccion (id_ave, fecha_puesta, numero_huevos, fecha_eclosion, n
 (8, '2024-04-25', 4, '2024-05-10', 4, 'Eclosión exitosa'),
 (9, '2024-04-28', 2, NULL, NULL, 'Huevos bajo observación'),
 (10, '2024-05-01', 3, '2024-05-17', 2, 'Eclosión parcial'),
-(11, '2024-04-24', 2, NULL, NULL, 'Incubación normal'),
+(11, '2024-04-24', 200, NULL, NULL, 'Incubación normal'),
 (12, '2024-04-27', 3, NULL, NULL, 'Huevos recién puestos'),
 (13, '2024-04-22', 3, NULL, NULL, 'Huevos bajo observación'),
 (14, '2024-04-24', 2, NULL, NULL, 'Incubación en curso'),
