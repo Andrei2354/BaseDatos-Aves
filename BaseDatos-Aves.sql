@@ -11,7 +11,7 @@ CREATE TABLE aves (
 CREATE TABLE reproduccion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_ave INT NOT NULL,
-    FOREIGN KEY (id_ave) REFERENCES aves(id),
+    FOREIGN KEY (id_ave) REFERENCES aves(id) ON UPDATE RESTRICT,
     fecha_puesta DATE NOT NULL,
     numero_huevos INT NOT NULL,
     fecha_eclosion DATE,
@@ -23,15 +23,15 @@ CREATE TABLE observaciones (
     fecha DATE NOT NULL,
     ubicacion VARCHAR(255) NOT NULL,
     id_ave INT NOT NULL,
-    FOREIGN KEY (id_ave) REFERENCES aves(id),
     condiciones_climaticas VARCHAR(100),
     observador VARCHAR(100),
-    notas TEXT
+    notas TEXT,
+    FOREIGN KEY (id_ave) REFERENCES aves(id) ON DELETE CASCADE ON UPDATE RESTRICT
 );
 CREATE TABLE migracion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_ave INT NOT NULL,
-    FOREIGN KEY (id_ave) REFERENCES aves(id),
+    FOREIGN KEY (id_ave) REFERENCES aves(id) ON DELETE RESTRICT,
     fecha_inicio DATE NOT NULL,
     fecha_fin DATE NOT NULL,
     ruta_migratoria VARCHAR(255),
@@ -58,8 +58,18 @@ CREATE TABLE morfologia (
     peso DECIMAL(10,2),
     observaciones TEXT
 );
+CREATE TABLE estado (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_ave INT NOT NULL,
+    FOREIGN KEY (id_ave) REFERENCES aves(id),
+    estado_conservacion VARCHAR(50) NOT NULL,
+    poblacion_estimada INT,
+    ultimo_censo DATE,
+    amenazas TEXT,
+    medidas_conservacion TEXT
+);
 -- Insertar datos en la tabla de aves
-INSERT INTO aves (familia, nombre_comun, nombre_cientifico) VALUES 
+INSERT INTO aves (familia, nombre_comun, nombre_cientifico) VALUES
 ('Accipitridae', 'Águila imperial oriental', 'Aquila heliaca'),
 ('Accipitridae', 'Águila imperial ibérica', 'Aquila adalberti'),
 ('Strigidae', 'Búho nival', 'Bubo scandiacus'),
@@ -255,3 +265,48 @@ INSERT INTO morfologia (id_ave, longitud_alas, envergadura, longitud_cola, peso,
 (28, 48.0, 115.0, NULL, 2.4, 'Mediciones aproximadas debido a agresividad del individuo'),
 (29, 62.0, 145.0, NULL, 3.3, 'Mediciones tomadas durante visita al nido'),
 (30, 58.0, 135.0, NULL, 3.0, 'Mediciones registradas durante cortejo y alimentación');
+
+INSERT INTO estado (id_ave, estado_conservacion, poblacion_estimada, ultimo_censo, amenazas, medidas_conservacion) VALUES
+(1, 'En peligro', 500, '2023-12-01', 'Pérdida de hábitat, caza ilegal', 'Creación de reservas, campañas de concienciación'),
+(2, 'Vulnerable', 800, '2023-11-15', 'Contaminación, cambio climático', 'Regulaciones ambientales, monitoreo continuo'),
+(3, 'Preocupación menor', 1500, '2023-10-20', 'Pérdida de hábitat', 'Protección de áreas de cría'),
+(4, 'Casi amenazado', 1200, '2023-09-30', 'Pérdida de hábitat, caza ilegal', 'Monitoreo de poblaciones, protección de hábitat'),
+(5, 'En peligro crítico', 200, '2023-08-25', 'Cambio climático, pérdida de hábitat', 'Cría en cautiverio, restauración de hábitats'),
+(6, 'Preocupación menor', 3000, '2023-07-10', 'Pérdida de hábitat', 'Protección de hábitats, monitoreo de poblaciones'),
+(7, 'Vulnerable', 700, '2023-06-15', 'Caza ilegal, pérdida de hábitat', 'Patrullas de vigilancia, creación de reservas'),
+(8, 'En peligro', 400, '2023-05-20', 'Pérdida de hábitat, caza ilegal', 'Protección de áreas de cría, campañas de concienciación'),
+(9, 'Preocupación menor', 2500, '2023-04-25', 'Pérdida de hábitat', 'Protección de hábitats'),
+(10, 'Casi amenazado', 1000, '2023-03-30', 'Contaminación, cambio climático', 'Regulaciones ambientales, protección de hábitats');
+
+DELIMITER //
+
+CREATE PROCEDURE InsertarAve(
+    IN familia VARCHAR(50),
+    IN nombre_comun VARCHAR(50),
+    IN nombre_cientifico VARCHAR(50),
+    OUT nuevo_id INT
+)
+BEGIN
+    INSERT INTO aves (familia, nombre_comun, nombre_cientifico)
+    VALUES (familia, nombre_comun, nombre_cientifico);
+    
+    SET nuevo_id = LAST_INSERT_ID();
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE FUNCTION TotalHuevosPuestos() 
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE total INT;
+    
+    SELECT SUM(numero_huevos) INTO total
+    FROM reproduccion;
+    
+    RETURN total;
+END //
+
+DELIMITER ;
